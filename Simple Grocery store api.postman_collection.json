@@ -50,7 +50,24 @@
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"product successfully retrieved\",function(){\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"console.log(response);\r",
+									"pm.environment.set(\"productId\",response[0].id);\r",
+									"\r",
 									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -114,9 +131,7 @@
 									"    console.log(response.inStock);\r",
 									"});\r",
 									"\r",
-									"const response = pm.response.json();\r",
-									"console.log(response.id);\r",
-									"pm.environment.set(\"productId\",response.id);\r",
+									"\r",
 									"//or we can write like this \r",
 									"/*\r",
 									" pm.test(\"At least one product is available \",  () => {\r",
@@ -128,6 +143,7 @@
 									"});\r",
 									"});*/\r",
 									"pm.test(\"correct product was retrived \", () => {\r",
+									"    const response = pm.response.json();\r",
 									"    const productId = pm.environment.get('productId');\r",
 									"    console.log(productId);\r",
 									"    pm.expect(response.id).to.eql(productId);\r",
@@ -174,8 +190,12 @@
 									"    pm.response.to.have.status(201);\r",
 									"});\r",
 									"\r",
-									"const res=pm.response.json();\r",
-									"pm.environment.set(\"cartId\", res.cartId);"
+									"\r",
+									"\r",
+									"const res = pm.response.json();\r",
+									"console.log(\"Cart ID:\", res.cartId);  // ✅ Should print xh59jmV-vYFZGcb5H-RUT\r",
+									"pm.environment.set(\"cartId\", res.cartId);\r",
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -184,8 +204,11 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"packages": {},
-								"type": "text/javascript"
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -426,6 +449,13 @@
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {\r",
 									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body contains accessToken\", function () { \r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.environment.set(\"accessToken\",jsonData.accessToken)\r",
+									"\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -497,6 +527,13 @@
 								"type": "text/javascript",
 								"packages": {}
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -514,7 +551,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"customerName\": \"Abdul Hannan\",\r\n    \"cartId\": \"{{cartId}}\"\r\n}",
+							"raw": "\r\n\r\n{\r\n  \"customerName\": \"Abdul Hannan\",\r\n  \"cartId\": \"{{cartId}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -645,72 +682,6 @@
 					"response": []
 				},
 				{
-					"name": "Update quantity",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"function getRandomNumber(maxValue) {\r",
-									"    return Math.floor(Math.random() * maxValue);\r",
-									"}\r",
-									"\r",
-									"pm.collectionVariables.set(\"randomQuantity\", getRandomNumber(14));\r",
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{accessToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"quantity\" : {{randomQuantity}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/carts/:cartId/items/:itemId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"carts",
-								":cartId",
-								"items",
-								":itemId"
-							],
-							"variable": [
-								{
-									"key": "cartId",
-									"value": "{{cartId}}"
-								},
-								{
-									"key": "itemId",
-									"value": "{{itemId}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Repalce product in cart",
 					"request": {
 						"auth": {
@@ -727,7 +698,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"quantity\" : 3,\r\n     \"productId\" : {{productId}}\r\n}",
+							"raw": "{\r\n    \"quantity\" : {{randomQuantity}},\r\n     \"productId\" : {{productId}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -752,7 +723,7 @@
 								},
 								{
 									"key": "itemId",
-									"value": "568661822"
+									"value": "{{itemId}}"
 								}
 							]
 						}
@@ -905,244 +876,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "Missing authentication",
-			"item": [
-				{
-					"name": "Missing Header",
-					"item": [
-						{
-							"name": "Add item to cart Copy",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"const response = pm.response.json();\r",
-											"\r",
-											"pm.test(\"Item created successfully\", function () {\r",
-											"    pm.expect(response.created).to.be.true;\r",
-											"    pm.expect(response.itemId).to.be.a('number');   // check itemId is a number\r",
-											"    pm.environment.set(\"itemId\", response.itemId); // save itemId to environment\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n\r\n\"productId\": {{productId}}\r\n\r\n\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/carts/:cartId/items",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"carts",
-										":cartId",
-										"items"
-									],
-									"variable": [
-										{
-											"key": "cartId",
-											"value": "{{cartId}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create an order -missing header",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"\r",
-											"\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{accessToken}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"customerName\": \"Abdul Hannan\",\r\n    \"cartId\": \"{{cartId}}\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/orders",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"orders"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"packages": {},
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"packages": {},
-								"exec": [
-									"pm.test(\"Response body contains 'error': 'Missing Authorization header.'\", function () {\r",
-									"\r",
-									"    const response=pm.response.json();\r",
-									"    pm.expect(response.error).to.eql(\"Missing Authorization header.\");\r",
-									"});"
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "invalid token",
-					"item": [
-						{
-							"name": "Create an order -invalid token",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{accessToken}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "wrong token for script",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"customerName\": \"Abdul Hannan\",\r\n    \"cartId\": \"{{cartId}}\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/orders",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"orders"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"packages": {},
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"packages": {},
-								"exec": [
-									"pm.test(\"Response body contains 'error': 'wrong token.'\", function () {\r",
-									"\r",
-									"    const response=pm.response.json();\r",
-									"    pm.expect(response.error).to.eql(\"Invalid bearer token.\");\r",
-									"});\r",
-									""
-								]
-							}
-						}
-					]
-				}
-			]
 		}
 	],
 	"event": [
@@ -1169,23 +902,19 @@
 	],
 	"variable": [
 		{
-			"key": "productId",
-			"value": ""
-		},
-		{
-			"key": "cartId",
-			"value": ""
-		},
-		{
-			"key": "orderId",
-			"value": ""
-		},
-		{
-			"key": "itemId",
-			"value": ""
-		},
-		{
 			"key": "randomQuantity",
+			"value": ""
+		},
+		{
+			"key": "baseUrl",
+			"value": ""
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "cardId",
 			"value": ""
 		}
 	]
